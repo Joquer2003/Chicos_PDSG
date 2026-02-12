@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IACYM Los Olivos | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-light: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-light);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+        
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        
+        .sidebar-header {
+            padding: 30px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .sidebar.collapsed .sidebar-header h2 {
+            display: none;
+        }
+        
+        .btn-add {
+            width: calc(100% - 40px);
+            margin: 0 20px;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.5);
+        }
+        
+        .sidebar.collapsed .btn-add {
+            width: 50px;
+            height: 50px;
+            margin: 0 15px;
+            padding: 0;
+        }
+        
+        .sidebar.collapsed .btn-add .text {
+            display: none;
+        }
+        
+        .menu-list {
+            list-style: none;
+            padding: 20px 10px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .menu-item {
+            margin: 8px 0;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+        }
+        
+        .menu-item.active::before {
+            transform: scaleY(1);
+        }
+        
+        .menu-icon {
+            font-size: 1.5rem;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .menu-text {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+        
+        .toggle-btn {
+            position: absolute;
+            right: -15px;
+            top: 30px;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: 3px solid var(--bg-main);
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .toggle-btn:hover {
+            transform: scale(1.1) rotate(180deg);
+        }
+        
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar.collapsed + .main-content {
+            margin-left: 80px;
+        }
+        
+        .top-bar {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stats-container {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .stat-pill {
+            padding: 10px 20px;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .stat-number {
+            color: var(--primary);
+            font-weight: 800;
+        }
+        
+        /* DATA GRID */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* CARDS */
+        .card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 800;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .card-row:last-child {
+            border-bottom: none;
+        }
+        
+        .card-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-value {
+            color: var(--text-light);
+            font-weight: 700;
+            text-align: right;
+            max-width: 60%;
+        }
+        
+        /* VALORES - TODOS CON LA MISMA INTENSIDAD VISUAL */
+        .value-styled {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.25));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+        }
+        
+        .value-styled:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+        }
+        
+        /* Fechas, horas y demás - MISMO ESTILO */
+        .date-value {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.25));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+        }
+        
+        .date-value:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+        }
+        
+        .time-value {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.25));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+        }
+        
+        .time-value:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+        }
+        
+        .datetime-value {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.25));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+        }
+        
+        .datetime-value:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+        }
+        
+        /* GROUP HEADER */
+        .group-header {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .group-header-icon {
+            font-size: 1.5rem;
+        }
+        
+        .group-header-text {
+            flex: 1;
+        }
+        
+        .group-header-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white;
+        }
+        
+        .group-header-count {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+        
+        /* LOADING */
+        .loading-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-text {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar .sidebar-header h2,
+            .sidebar .menu-text,
+            .sidebar .btn-add .text {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar" id="sidebar">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <div class="logo-icon">⛪</div>
+            </div>
+            <h2>IACYM LOS OLIVOS</h2>
+        </div>
+        
+        <button class="btn-add" onclick="window.open('https://forms.gle/YXjBZD1YD6JfzzYF7', '_blank')">
+            <span>➕</span>
+            <span class="text">Agregar Datos</span>
+        </button>
+        
+        <ul class="menu-list">
+            <li class="menu-item active" onclick="loadData('Tutores', this)">
+                <span class="menu-icon">👤</span>
+                <span class="menu-text">Tutores</span>
+            </li>
+            <li class="menu-item" onclick="loadData('Chicos', this)">
+                <span class="menu-icon">👦</span>
+                <span class="menu-text">Chicos</span>
+            </li>
+            <li class="menu-item" onclick="loadData('MNACD', this)">
+                <span class="menu-icon">📚</span>
+                <span class="menu-text">MNACD</span>
+            </li>
+            <li class="menu-item" onclick="loadData('EBC', this)">
+                <span class="menu-icon">📖</span>
+                <span class="menu-text">EBC</span>
+            </li>
+            <li class="menu-item" onclick="loadData('Eventos', this)">
+                <span class="menu-icon">📅</span>
+                <span class="menu-text">Eventos</span>
+            </li>
+            <li class="menu-item" onclick="loadData('Seguimiento', this)">
+                <span class="menu-icon">📈</span>
+                <span class="menu-text">Seguimiento</span>
+            </li>
+            <li class="menu-item" onclick="loadData('Celulas', this)">
+                <span class="menu-icon">🏠</span>
+                <span class="menu-text">Células</span>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title" id="page-title">📊 Panel de Control</h1>
+            <div class="stats-container">
+                <div class="stat-pill">
+                    <span>📦</span>
+                    <span>Total:</span>
+                    <span class="stat-number" id="total-count">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="data-grid" id="container"></div>
+    </main>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwiJR2oY4YGy3QFtuooCuXoGsy325vkjAL5PllpUCWQU9l1QS0tUDch8VEtYWw2DPU_Fg/exec";
+        
+        const categoryEmojis = {
+            'Tutores': '👤',
+            'Chicos': '👦',
+            'MNACD': '📚',
+            'EBC': '📖',
+            'Eventos': '📅',
+            'Seguimiento': '📈',
+            'Celulas': '🏠'
+        };
+        
+        const fieldEmojis = {
+            'nombres': '👤',
+            'nombre': '👤',
+            'apellidos': '📝',
+            'apellido': '📝',
+            'dni': '🆔',
+            'telefono': '📱',
+            'teléfono': '📱',
+            'celular': '📱',
+            'direccion': '🏠',
+            'dirección': '🏠',
+            'edad': '🎂',
+            'cumpleaños': '🎉',
+            'cumpleaño': '🎉',
+            'fecha': '📅',
+            'evento': '🎯',
+            'lugar': '📍',
+            'tutor': '👨‍🏫',
+            'llamas': '👨‍🏫',
+            'chico': '👦',
+            'agrega': '👦',
+            'tipo': '🏷️',
+            'observaciones': '📝',
+            'nota': '📝',
+            'email': '📧',
+            'correo': '📧',
+            'color': '🎨',
+            'pastel': '🎂',
+            'postre': '🍰',
+            'hobby': '🎮',
+            'plato': '🍽️',
+            'comida': '🍽️'
+        };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        function getFieldEmoji(fieldName) {
+            const lowerField = fieldName.toLowerCase();
+            for (let key in fieldEmojis) {
+                if (lowerField.includes(key)) {
+                    return fieldEmojis[key];
+                }
+            }
+            return '📌';
+        }
+
+        const correccionesOrtograficas = {
+            'cuales': 'cuáles',
+            'cual': 'cuál',
+            'cuando': 'cuándo',
+            'donde': 'dónde',
+            'como': 'cómo',
+            'que': 'qué',
+            'quien': 'quién',
+            'quienes': 'quiénes',
+            'cuanto': 'cuánto',
+            'cuanta': 'cuánta',
+            'cuantos': 'cuántos',
+            'cuantas': 'cuántas',
+            'mas': 'más',
+            'cumpleanos': 'cumpleaños'
+        };
+
+        function corregirTexto(texto) {
+            if (!texto) return texto;
+            
+            texto = String(texto).trim();
+            
+            if (/^\d{4}-\d{2}-\d{2}/.test(texto) || /^\d+$/.test(texto)) {
+                return texto;
+            }
+            
+            let palabras = texto.split(' ');
+            palabras = palabras.map(palabra => {
+                const palabraLower = palabra.toLowerCase();
+                const palabraLimpia = palabraLower.replace(/[¿?¡!,.:;]/g, '');
+                
+                if (correccionesOrtograficas[palabraLimpia]) {
+                    const puntuacionInicio = palabra.match(/^[¿¡]/)?.[0] || '';
+                    const puntuacionFin = palabra.match(/[?!,.:;]+$/)?.[0] || '';
+                    const palabraCorregida = correccionesOrtograficas[palabraLimpia];
+                    
+                    return puntuacionInicio + palabraCorregida + puntuacionFin;
+                }
+                
+                return palabra;
+            });
+            
+            texto = palabras.join(' ');
+            texto = texto.charAt(0).toUpperCase() + texto.slice(1);
+            texto = texto.replace(/([¿?¡!]\s*)([a-záéíóúñ])/g, (match, p1, p2) => {
+                return p1 + p2.toUpperCase();
+            });
+            texto = texto.replace(/(\.\s+)([a-záéíóúñ])/g, (match, p1, p2) => {
+                return p1 + p2.toUpperCase();
+            });
+            texto = texto.replace(/\b(es|eres)\s+tu\b/gi, '$1 tú');
+            
+            return texto;
+        }
+
+        function capitalizarTexto(texto) {
+            if (!texto) return texto;
+            
+            texto = String(texto).trim();
+            
+            if (/^\d{4}-\d{2}-\d{2}/.test(texto) || /^\d+$/.test(texto)) {
+                return texto;
+            }
+            
+            return texto
+                .toLowerCase()
+                .split(' ')
+                .map(palabra => {
+                    if (palabra.length === 0) return palabra;
+                    return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+                })
+                .join(' ');
+        }
+
+        function formatearValor(valor, nombreCampo) {
+            const esCumpleanos = nombreCampo && (
+                nombreCampo.toLowerCase().includes('cumpleaños') || 
+                nombreCampo.toLowerCase().includes('cumpleaño') ||
+                nombreCampo.toLowerCase().includes('nacimiento')
+            );
+            
+            // Fechas ISO con hora
+            const regexISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/;
+            const matchISO = valor.match(regexISO);
+            
+            if (matchISO) {
+                const [_, year, month, day, hour, minute] = matchISO;
+                const mesesLargos = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                const nombreMes = mesesLargos[parseInt(month) - 1];
+                
+                if (esCumpleanos) {
+                    return `<span class="date-value">🎂 ${day} de ${nombreMes}, ${year}</span>`;
+                }
+                
+                let hora = parseInt(hour);
+                const ampm = hora >= 12 ? 'PM' : 'AM';
+                hora = hora % 12 || 12;
+                
+                return `<span class="datetime-value">📅 ${day} ${nombreMes} ${year} • 🕐 ${hora}:${minute} ${ampm}</span>`;
+            }
+            
+            // Solo fechas
+            const regexFecha = /^(\d{4})-(\d{2})-(\d{2})$/;
+            const matchFecha = valor.match(regexFecha);
+            
+            if (matchFecha) {
+                const [_, year, month, day] = matchFecha;
+                const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                const nombreMes = meses[parseInt(month) - 1];
+                
+                const icono = esCumpleanos ? '🎂' : '📅';
+                return `<span class="date-value">${icono} ${day} de ${nombreMes}, ${year}</span>`;
+            }
+            
+            // Solo horas
+            const regexHora = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
+            const matchHora = valor.match(regexHora);
+            
+            if (matchHora) {
+                let [_, hour, minute] = matchHora;
+                hour = parseInt(hour);
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                hour = hour % 12 || 12;
+                
+                return `<span class="time-value">🕐 ${hour}:${minute} ${ampm}</span>`;
+            }
+            
+            // TODOS los demás valores con el mismo estilo
+            const textoCapitalizado = capitalizarTexto(valor);
+            return `<span class="value-styled">${textoCapitalizado}</span>`;
+        }
+
+        function agruparPorTutor(data) {
+            const grupos = {};
+            
+            data.forEach(item => {
+                let tutor = null;
+                let chico = null;
+                
+                for (let key in item) {
+                    const keyLower = key.toLowerCase();
+                    
+                    if (keyLower.includes('llamas') || keyLower.includes('tutor') || keyLower.includes('como te')) {
+                        tutor = item[key];
+                    }
+                    
+                    if (keyLower.includes('agrega') || keyLower.includes('chico') || keyLower.includes('célula')) {
+                        chico = item[key];
+                    }
+                }
+                
+                if (!tutor || tutor.trim() === '') {
+                    tutor = 'Sin Tutor';
+                }
+                
+                if (!grupos[tutor]) {
+                    grupos[tutor] = {
+                        tutor: tutor,
+                        chicos: [],
+                        otros: {}
+                    };
+                }
+                
+                if (chico && chico.trim() !== '') {
+                    grupos[tutor].chicos.push(chico);
+                }
+                
+                for (let key in item) {
+                    const keyLower = key.toLowerCase();
+                    if (!keyLower.includes('llamas') && 
+                        !keyLower.includes('tutor') && 
+                        !keyLower.includes('agrega') && 
+                        !keyLower.includes('chico') && 
+                        !keyLower.includes('célula') &&
+                        key !== 'timestamp' && 
+                        key !== 'área' &&
+                        item[key]) {
+                        if (!grupos[tutor].otros[key]) {
+                            grupos[tutor].otros[key] = item[key];
+                        }
+                    }
+                }
+            });
+            
+            return Object.values(grupos);
+        }
+
+        async function loadData(seccion, el = null) {
+            const container = document.getElementById('container');
+            const categoryEmoji = categoryEmojis[seccion] || '📊';
+            document.getElementById('page-title').innerHTML = `${categoryEmoji} Panel de ${seccion}`;
+            
+            if(el) {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                el.classList.add('active');
+            }
+            
+            container.innerHTML = `
+                <div class="loading-card">
+                    <div class="spinner"></div>
+                    <p style="color: var(--text-muted); font-weight: 600;">Cargando datos de ${seccion}...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${SCRIPT_URL}?pestaña=${seccion}&v=${new Date().getTime()}`);
+                const data = await res.json();
+                container.innerHTML = "";
+
+                if (!data || data.length === 0 || data.error) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">${categoryEmoji}</div>
+                            <p class="empty-text">${data.error || 'No hay datos registrados aún'}</p>
+                        </div>
+                    `;
+                    document.getElementById('total-count').textContent = '0';
+                    return;
+                }
+
+                if (seccion === 'Celulas' || seccion === 'Células') {
+                    const grupos = agruparPorTutor(data);
+                    document.getElementById('total-count').textContent = grupos.length;
+                    
+                    grupos.forEach((grupo, index) => {
+                        const tutorCapitalizado = capitalizarTexto(grupo.tutor);
+                        const chicosNombres = grupo.chicos
+                            .map(c => capitalizarTexto(c.split(' ')[0]))
+                            .join(' y ');
+                        
+                        let html = `
+                            <div class="card" style="animation-delay: ${index * 0.05}s">
+                                <div class="badge">${categoryEmoji} CÉLULA</div>
+                                <div class="group-header">
+                                    <span class="group-header-icon">👨‍🏫</span>
+                                    <div class="group-header-text">
+                                        <div class="group-header-title">${tutorCapitalizado}</div>
+                                        <div class="group-header-count">${grupo.chicos.length} chico(s)</div>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                        `;
+                        
+                        if (grupo.chicos.length > 0) {
+                            html += `
+                                <div class="card-row">
+                                    <div class="card-label">
+                                        <span>👦</span>
+                                        <span>Chicos</span>
+                                    </div>
+                                    <div class="card-value">
+                                        <span class="value-styled">${chicosNombres}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        
+                        for (let key in grupo.otros) {
+                            if (grupo.otros[key]) {
+                                let label = corregirTexto(key.replace(/_/g, ' '));
+                                let emoji = getFieldEmoji(key);
+                                let valorFormateado = formatearValor(String(grupo.otros[key]), key);
+                                
+                                html += `
+                                    <div class="card-row">
+                                        <div class="card-label">
+                                            <span>${emoji}</span>
+                                            <span>${label}</span>
+                                        </div>
+                                        <div class="card-value">${valorFormateado}</div>
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        html += `</div></div>`;
+                        container.innerHTML += html;
+                    });
+                    
+                } else {
+                    document.getElementById('total-count').textContent = data.length;
+
+                    data.forEach((item, index) => {
+                        let labelBadge = seccion.toUpperCase();
+                        if(labelBadge.endsWith('ES')) labelBadge = labelBadge.slice(0, -2);
+                        else if(labelBadge.endsWith('S')) labelBadge = labelBadge.slice(0, -1);
+
+                        let html = `
+                            <div class="card" style="animation-delay: ${index * 0.05}s">
+                                <div class="badge">${categoryEmoji} ${labelBadge}</div>
+                                <div class="card-content">
+                        `;
+                        
+                        for (let key in item) {
+                            if (item[key] && key !== 'timestamp' && key !== 'área') {
+                                let label = corregirTexto(key.replace(/_/g, ' '));
+                                let emoji = getFieldEmoji(key);
+                                let valorFormateado = formatearValor(String(item[key]), key);
+                                
+                                html += `
+                                    <div class="card-row">
+                                        <div class="card-label">
+                                            <span>${emoji}</span>
+                                            <span>${label}</span>
+                                        </div>
+                                        <div class="card-value">${valorFormateado}</div>
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        html += `</div></div>`;
+                        container.innerHTML += html;
+                    });
+                }
+            } catch (e) {
+                container.innerHTML = `
+                    <div class="empty-state" style="border-left: 4px solid #ef4444;">
+                        <div class="empty-icon">❌</div>
+                        <h3 style="color: #ef4444; margin-bottom: 10px;">Error de Conexión</h3>
+                        <p class="empty-text">No se pudo cargar los datos. Verifica la URL del script.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        window.onload = () => loadData('Tutores');
+    </script>
+</body>
+</html>
