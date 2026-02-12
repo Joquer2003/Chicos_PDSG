@@ -909,9 +909,19 @@
                     
                     grupos.forEach((grupo, index) => {
                         const tutorCapitalizado = capitalizarTexto(grupo.tutor);
-                        const chicosNombres = grupo.chicos
-                            .map(c => capitalizarTexto(c.split(' ')[0]))
-                            .join(' y ');
+                        
+                        // Formatear nombres correctamente: "A, B y C"
+                        const nombresFormateados = grupo.chicos.map(c => capitalizarTexto(c.split(' ')[0]));
+                        let chicosNombres;
+                        if (nombresFormateados.length === 1) {
+                            chicosNombres = nombresFormateados[0];
+                        } else if (nombresFormateados.length === 2) {
+                            chicosNombres = nombresFormateados.join(' y ');
+                        } else {
+                            const ultimos = nombresFormateados.slice(-1)[0];
+                            const primeros = nombresFormateados.slice(0, -1).join(', ');
+                            chicosNombres = primeros + ' y ' + ultimos;
+                        }
                         
                         let html = `
                             <div class="card" style="animation-delay: ${index * 0.05}s">
